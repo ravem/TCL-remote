@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 850" font-family="Roboto, system-ui, sans-serif">
+  <!-- Phone frame -->
+  <rect x="0" y="0" width="380" height="850" rx="32" fill="#0f0f14"/>
+  <rect x="12" y="12" width="356" height="826" rx="26" fill="#1d1d29"/>
+
+  <!-- Header -->
+  <text x="40" y="70" font-size="24" font-weight="700" fill="#f2f2f5">TCL Remote</text>
+  <text x="40" y="94" font-size="13" fill="#b3b3c0">TCL 50Q6C • on</text>
+
+  <!-- Volume row -->
+  <g>
+    <circle cx="60" cy="150" r="24" fill="#2c2c3d"/>
+    <text x="60" y="155" text-anchor="middle" font-size="16" fill="#fff">−</text>
+    <text x="190" y="156" text-anchor="middle" font-size="16" fill="#f2f2f5">Vol 32</text>
+    <circle cx="320" cy="150" r="24" fill="#2c2c3d"/>
+    <text x="320" y="155" text-anchor="middle" font-size="16" fill="#fff">＋</text>
+    <circle cx="360" cy="150" r="20" fill="#2c2c3d"/>
+    <text x="360" y="155" text-anchor="middle" font-size="14" fill="#b3b3c0">M</text>
+  </g>
+
+  <!-- D-pad -->
+  <g>
+    <!-- up -->
+    <rect x="168" y="190" width="44" height="40" rx="8" fill="#2c2c3d"/>
+    <polygon points="190,198 200,214 180,214" fill="#fff"/>
+    <!-- left -->
+    <rect x="120" y="250" width="40" height="44" rx="8" fill="#2c2c3d"/>
+    <polygon points="128,272 144,262 144,282" fill="#fff"/>
+    <!-- center OK -->
+    <rect x="158" y="250" width="64" height="44" rx="10" fill="#7c3aed"/>
+    <text x="190" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">OK</text>
+    <!-- right -->
+    <rect x="220" y="250" width="40" height="44" rx="8" fill="#2c2c3d"/>
+    <polygon points="252,272 236,262 236,282" fill="#fff"/>
+    <!-- down -->
+    <rect x="168" y="314" width="44" height="40" rx="8" fill="#2c2c3d"/>
+    <polygon points="190,344 200,328 180,328" fill="#fff"/>
+  </g>
+
+  <!-- Power / Home / Back -->
+  <g font-size="14" text-anchor="middle">
+    <circle cx="120" cy="404" r="22" fill="#2c2c3d"/>
+    <text x="120" y="409" fill="#ff6b6b">⏻</text>
+    <circle cx="190" cy="404" r="22" fill="#2c2c3d"/>
+    <text x="190" y="409" fill="#fff">⌂</text>
+    <circle cx="260" cy="404" r="22" fill="#2c2c3d"/>
+    <text x="260" y="409" fill="#fff">↩</text>
+  </g>
+
+  <!-- Text input -->
+  <g>
+    <rect x="40" y="452" width="300" height="46" rx="12" fill="#2c2c3d"/>
+    <text x="52" y="480" font-size="13" fill="#8a8a99">Send text to TV</text>
+    <rect x="250" y="452" width="90" height="46" rx="12" fill="#7c3aed"/>
+    <text x="295" y="480" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Send</text>
+  </g>
+
+  <!-- Voice button -->
+  <rect x="40" y="522" width="300" height="56" rx="28" fill="#3ddc84"/>
+  <circle cx="80" cy="550" r="14" fill="#fff"/>
+  <text x="82" y="555" text-anchor="middle" font-size="16" fill="#0f0f14">🎤</text>
+  <text x="130" y="556" font-size="16" font-weight="600" fill="#0f0f14">Hold to speak</text>
+
+  <!-- Apps grid -->
+  <text x="40" y="626" font-size="16" font-weight="700" fill="#f2f2f5">Apps</text>
+  <g>
+    <!-- Netflix -->
+    <rect x="40" y="646" width="96" height="96" rx="14" fill="#1b1b2f"/>
+    <rect x="60" y="670" width="56" height="28" rx="6" fill="#e50914"/>
+    <text x="88" y="690" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">N</text>
+    <text x="88" y="758" text-anchor="middle" font-size="12" fill="#d0d0da">Netflix</text>
+
+    <!-- YouTube -->
+    <rect x="146" y="646" width="96" height="96" rx="14" fill="#1b1b2f"/>
+    <rect x="166" y="670" width="56" height="28" rx="6" fill="#ff0000"/>
+    <polygon points="190,678 200,684 190,690" fill="#fff"/>
+    <text x="194" y="758" text-anchor="middle" font-size="12" fill="#d0d0da">YouTube</text>
+
+    <!-- Spotify -->
+    <rect x="252" y="646" width="96" height="96" rx="14" fill="#1b1b2f"/>
+    <rect x="272" y="670" width="56" height="28" rx="6" fill="#1db954"/>
+    <text x="300" y="690" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">S</text>
+    <text x="300" y="758" text-anchor="middle" font-size="12" fill="#d0d0da">Spotify</text>
+
+    <!-- Disney+ -->
+    <rect x="40" y="772" width="96" height="96" rx="14" fill="#1b1b2f"/>
+    <rect x="60" y="796" width="56" height="28" rx="6" fill="#0e47ba"/>
+    <text x="88" y="816" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">D+</text>
+    <text x="88" y="884" text-anchor="middle" font-size="12" fill="#d0d0da">Disney+</text>
+
+    <!-- Prime -->
+    <rect x="146" y="772" width="96" height="96" rx="14" fill="#1b1b2f"/>
+    <rect x="166" y="796" width="56" height="28" rx="6" fill="#00a8e1"/>
+    <text x="194" y="816" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">PV</text>
+    <text x="194" y="884" text-anchor="middle" font-size="12" fill="#d0d0da">Prime</text>
+
+    <!-- More -->
+    <rect x="252" y="772" width="96" height="96" rx="14" fill="#1b1b2f"/>
+    <rect x="272" y="796" width="56" height="28" rx="6" fill="#5a5a6e"/>
+    <text x="300" y="816" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">+</text>
+    <text x="300" y="884" text-anchor="middle" font-size="12" fill="#d0d0da">More</text>
+  </g>
+</svg>
