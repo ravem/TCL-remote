@@ -18,6 +18,7 @@ dynamic color on Android 12 and newer.
 - Directional pad (up, down, left, right, OK), back and home.
 - Power on / off and mute.
 - Volume up / down.
+- Channel up / down.
 - Text input to the TV's focused search field (IME).
 - Launching apps from a curated catalog of well-known Android TV apps, using
   package names or app links. Since the remote protocol cannot enumerate

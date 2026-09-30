@@ -106,6 +106,18 @@ fun RemoteScreen(state: TclRemoteViewModel.UiState, viewModel: TclRemoteViewMode
                 Icon(Icons.Default.VolumeMute, contentDescription = "Mute")
             }
         }
+        Spacer(Modifier.height(8.dp))
+
+        // Channel
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FilledIconButton(onClick = { viewModel.sendKey("ch-") }) { Text("CH−", style = MaterialTheme.typography.titleMedium) }
+            Text("Channel", style = MaterialTheme.typography.titleMedium)
+            FilledIconButton(onClick = { viewModel.sendKey("ch+") }) { Text("CH＋", style = MaterialTheme.typography.titleMedium) }
+        }
         Spacer(Modifier.height(12.dp))
 
         // D-pad

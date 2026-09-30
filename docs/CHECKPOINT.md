@@ -15,7 +15,7 @@ ADB e nessuna opzione sviluppatore richiesta sulla TV per le funzioni base.
   self-signed (RSA 2048, BouncyCastle) generato e riusato in locale.
 - Connessione remota persistente (porta 6466) con gestione di stato
   (acceso/spento, app corrente, volume).
-- Comandi: D-pad, OK, back, home, power, volume su/giu, mute.
+- Comandi: D-pad, OK, back, home, power, volume su/giu, mute, canali su/giu.
 - Input testo via IME nelle caselle di ricerca della TV.
 - Voice push-to-talk (il telefono fa da microfono, 8 kHz mono PCM).
 - Catalogo curato di app note (avvio via app link / package).
