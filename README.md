@@ -25,6 +25,10 @@ dynamic color on Android 12 and newer.
 - Push-to-talk voice input through Google Assistant on the TV. The phone acts
   as the microphone: audio is captured at 8 kHz mono 16-bit PCM and streamed to
   the TV over the same connection.
+- Extra features when the TV network debugging (ADB) is enabled:
+  - Listing the apps actually installed on the TV and launching them.
+  - Switching between HDMI / AV inputs and the Live TV tuner.
+  - Opening the audio output settings and the quick settings panel.
 
 ## Requirements
 
@@ -32,6 +36,10 @@ dynamic color on Android 12 and newer.
 - The phone and the TV must be on the same local network.
 - On Android 17 (API 37) the app requests the local network permission and on
   all versions it requests the microphone permission for voice input.
+- The extra ADB features require the TV network debugging to be enabled:
+  Settings -> System -> About, tap the Android TV OS build 7 times, then
+  Developer options -> USB debugging and Network debugging. The first scan
+  asks for authorisation on the TV.
 
 ## Protocol notes
 
@@ -45,6 +53,8 @@ libraries. It uses:
   on port 6466.
 - Protobuf messages (`polo.proto` for pairing and `remotemessage.proto` for
   commands), framed with a varint length prefix.
+- An ADB client over the network (`dev.mobile:dadb`) for the optional
+  network-debugging features (installed apps, inputs, audio).
 
 ## Building
 
@@ -71,6 +81,7 @@ app/src/main/java/it/paolostefani/tclremote/
   TclRemoteViewModel.kt      State holder and orchestration.
   ui/                        Compose screens and theme.
   remote/
+    TvAdb.kt                  Optional ADB client (network debugging) extras.
     CertStore.kt             Self-signed certificate generation and SSL.
     PairingConnection.kt     Pairing handshake (port 6467).
     RemoteConnection.kt      Persistent remote connection (port 6466).

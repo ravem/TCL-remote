@@ -85,6 +85,9 @@ dependencies {
 
     implementation("com.google.protobuf:protobuf-javalite:3.25.5")
 
+    // ADB client over the network (for TV network debugging, port 5555)
+    implementation("dev.mobile:dadb:2.0.0")
+
     // BouncyCastle for generating the self-signed pairing certificate
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.78.1")

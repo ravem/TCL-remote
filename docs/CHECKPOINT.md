@@ -32,25 +32,20 @@ Per abilitarlo: Impostazioni -> Sistema -> Informazioni -> premere 7 volte su
 "Debug USB" e "Debug di rete". Alla prima scansione accettare la richiesta di
 autorizzazione sul TV.
 
-1. Enumerazione automatica delle app installate
-   - Query degli activity LEANBACK_LAUNCHER via `cmd package query-activities`.
-   - Fallback a `pm list packages -3` su firmware piu vecchi.
-   - Risoluzione dei nomi reali tramite la pagina Play Store; cache in locale.
-   - Esclusione dei package di sistema (com.android.*, com.tcl.*, ecc.).
+Alcune di queste sono gia implementate nell'app e vengono attivate
+automaticamente quando il debug di rete e disponibile:
 
-2. Cambio input HDMI / AV
-   - Lettura della topologia input via `dumpsys tv_input`.
-   - Avvio dell'input passthrough tramite intent VIEW con URI
-     `content://android.media.tv/passthrough/...`.
-   - Scorciatoia "Live TV" per il servizio tuner (com.tcl.tv).
+- [x] Enumerazione automatica delle app installate.
+      Query degli activity LEANBACK_LAUNCHER via `cmd package
+      query-activities`; fallback a `pm list packages -3`; nomi leggibili.
+- [x] Cambio input HDMI / AV (analisi `dumpsys tv_input`, intent VIEW
+      passthrough, scorciatoia Live TV, AirPlay).
+- [x] Apertura delle impostazioni audio e dei quick settings.
 
-3. Impostazioni audio e quick settings
-   - Apertura della schermata Audio Output (Sound settings).
-   - Apertura del dialogo/scheda di Output Audio di sistema.
-   - Apertura della dashboard Quick Settings.
+Rimangono da fare / da verificare sul campo:
 
-4. Migliorie voce (opzionali)
-   - Indicatore di stato e gestione errori della sessione vocale.
+- [ ] Verifica pratica su TV con debug abilitato (pairing autorizzazione ADB).
+- [ ] Migliorie voce (indicatore di stato ed errori della sessione).
 
 ## Note tecniche
 

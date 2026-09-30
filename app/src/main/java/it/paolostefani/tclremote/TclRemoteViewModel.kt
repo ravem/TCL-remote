@@ -12,6 +12,7 @@ import it.paolostefani.tclremote.remote.CertStore
 import it.paolostefani.tclremote.remote.Keys
 import it.paolostefani.tclremote.remote.PairingConnection
 import it.paolostefani.tclremote.remote.RemoteConnection
+import it.paolostefani.tclremote.remote.TvAdb
 import it.paolostefani.tclremote.remote.TvDiscovery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +40,10 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
         val voiceActive: Boolean = false,
         val pairingServerName: String? = null,
         val apps: List<AppCatalog.App> = AppCatalog.apps,
+        val adbConnected: Boolean = false,
+        val installedApps: List<TvAdb.InstalledApp> = emptyList(),
+        val inputs: List<TvAdb.InputSpec> = emptyList(),
+        val audioOutputs: List<TvAdb.AudioOutput> = emptyList(),
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -52,6 +57,7 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
     private var currentHost: String? = null
     private var voiceThread: Thread? = null
     private var audioRecord: AudioRecord? = null
+    @Volatile private var adb: TvAdb? = null
 
     // ---- discovery --------------------------------------------------------
 
@@ -97,6 +103,7 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
                 message = null,
                 currentApp = null
             )
+            connectAdb(host)
         } catch (e: SSLException) {
             // The TV rejected our (unpaired) certificate -> start pairing.
             startPairing(host)
@@ -178,7 +185,66 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
     fun disconnect() {
         remote?.close()
         remote = null
+        adb?.close()
+        adb = null
         _state.value = _state.value.copy(phase = Phase.IDLE, isOn = null, currentApp = null)
+    }
+
+    // ---- ADB (network debugging) extras -------------------------------------
+
+    private fun connectAdb(host: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val a = TvAdb(getApplication(), host)
+            if (a.connect()) {
+                adb = a
+                refreshAdb()
+            } else {
+                _state.value = _state.value.copy(
+                    adbConnected = false,
+                    message = "ADB non raggiungibile: abilita Opzioni sviluppatore -> Debug di rete sul TV."
+                )
+            }
+        }
+    }
+
+    fun refreshAdb() {
+        val a = adb ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val apps = a.scanInstalled()
+                val inputs = a.scanInputs()
+                val audio = a.scanAudio()
+                _state.value = _state.value.copy(
+                    adbConnected = true,
+                    installedApps = apps,
+                    inputs = inputs,
+                    audioOutputs = audio,
+                    message = null
+                )
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(adbConnected = true, message = "ADB scan failed: ${e.message}")
+            }
+        }
+    }
+
+    fun launchInstalledApp(pkg: String) {
+        adb?.let { a -> viewModelScope.launch(Dispatchers.IO) { a.launchApp(pkg) } }
+    }
+
+    fun switchInput(inputId: String) {
+        adb?.let { a -> viewModelScope.launch(Dispatchers.IO) { a.switchInput(inputId) } }
+    }
+
+    fun openSoundSettings() {
+        adb?.let { a -> viewModelScope.launch(Dispatchers.IO) { a.openSoundSettings() } }
+    }
+
+    fun openQuickSettings() {
+        adb?.let { a -> viewModelScope.launch(Dispatchers.IO) { a.openQuickSettings() } }
+    }
+
+    fun adbStartActivity(component: String) {
+        adb?.let { a -> viewModelScope.launch(Dispatchers.IO) { a.startActivity(component) } }
     }
 
     // ---- voice ------------------------------------------------------------
@@ -270,6 +336,7 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
     override fun onCleared() {
         stopVoice()
         remote?.close()
+        adb?.close()
         super.onCleared()
     }
 }

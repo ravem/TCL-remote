@@ -2,6 +2,7 @@ package it.paolostefani.tclremote.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -126,19 +128,68 @@ fun RemoteScreen(state: TclRemoteViewModel.UiState, viewModel: TclRemoteViewMode
         VoiceButton(active = state.voiceActive, viewModel = viewModel)
         Spacer(Modifier.height(20.dp))
 
+        // ADB extras (inputs + quick settings / sound)
+        if (state.adbConnected) {
+            InputsSection(state, viewModel)
+            Spacer(Modifier.height(20.dp))
+        }
+
         // Apps
         Text("Apps", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth().height(400.dp)
-        ) {
-            items(state.apps) { app ->
-                AppTile(app.label, app.color) { viewModel.launchApp(app.id) }
+        if (state.installedApps.isNotEmpty()) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth().height(400.dp)
+            ) {
+                items(state.installedApps.size) { i ->
+                    val app = state.installedApps[i]
+                    AppTile(app.name, 0xFF5A5A6E) { viewModel.launchInstalledApp(app.pkg) }
+                }
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth().height(400.dp)
+            ) {
+                items(state.apps) { app ->
+                    AppTile(app.label, app.color) { viewModel.launchApp(app.id) }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun InputsSection(state: TclRemoteViewModel.UiState, viewModel: TclRemoteViewModel) {
+    Text("Inputs", style = MaterialTheme.typography.titleMedium)
+    Spacer(Modifier.height(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        state.inputs.forEach { input ->
+            AssistChip(
+                onClick = {
+                    when (input.type) {
+                        "key" -> viewModel.sendKey(input.value)
+                        "adb_app" -> viewModel.launchInstalledApp(input.value)
+                        "adb_input" -> viewModel.switchInput(input.value)
+                        "adb_activity" -> viewModel.adbStartActivity(input.value)
+                    }
+                },
+                label = { Text(input.label) }
+            )
+        }
+    }
+    Spacer(Modifier.height(12.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Button(onClick = { viewModel.openQuickSettings() }) { Text("Quick settings") }
+        Button(onClick = { viewModel.openSoundSettings() }) { Text("Sound") }
     }
 }
 
