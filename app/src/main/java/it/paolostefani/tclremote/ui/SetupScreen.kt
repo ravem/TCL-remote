@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -68,7 +69,7 @@ fun SetupScreen(state: TclRemoteViewModel.UiState, viewModel: TclRemoteViewModel
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (state.phase == TclRemoteViewModel.Phase.DISCOVERING) {
                         CircularProgressIndicator(
-                            modifier = Modifier.height(20.dp),
+                            modifier = Modifier.size(18.dp),
                             strokeWidth = 2.dp,
                             color = MaterialTheme.colorScheme.onPrimary
                         )
