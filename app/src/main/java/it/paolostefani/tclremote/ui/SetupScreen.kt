@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -37,7 +39,12 @@ import it.paolostefani.tclremote.TclRemoteViewModel
 fun SetupScreen(state: TclRemoteViewModel.UiState, viewModel: TclRemoteViewModel) {
     val isPairing = state.phase == TclRemoteViewModel.Phase.NEEDS_PAIRING
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .imePadding()
+            .navigationBarsPadding()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("TCL Remote", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
@@ -77,8 +84,8 @@ fun SetupScreen(state: TclRemoteViewModel.UiState, viewModel: TclRemoteViewModel
             if (state.devices.isNotEmpty()) {
                 Text("Devices found:", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(state.devices) { device ->
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    state.devices.forEach { device ->
                         Card(onClick = { viewModel.connect(device) }, modifier = Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(16.dp)) {
                                 Text(device.name, style = MaterialTheme.typography.titleMedium)
