@@ -37,6 +37,12 @@ import java.time.temporal.ChronoUnit
  */
 class CertStore(private val context: Context) {
 
+    init {
+        if (java.security.Security.getProvider("BC") == null) {
+            java.security.Security.addProvider(org.bouncycastle.jce.provider.BouncyCastleProvider())
+        }
+    }
+
     private val certFile: File
         get() = File(context.filesDir, "tclr_cert.pem")
     private val keyFile: File

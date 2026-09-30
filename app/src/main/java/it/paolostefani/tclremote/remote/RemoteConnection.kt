@@ -171,10 +171,12 @@ class RemoteConnection(
             model = cfg.deviceInfo.model,
             version = cfg.deviceInfo.appVersion
         ))
+        // Advertise only the features the TV actually supports (intersection).
+        val supported = DEFAULT_FEATURES and cfg.code1
         val resp = RemoteMessage.newBuilder()
             .setRemoteConfigure(
                 RemoteConfigure.newBuilder()
-                    .setCode1(DEFAULT_FEATURES)
+                    .setCode1(supported)
                     .setDeviceInfo(
                         RemoteDeviceInfo.newBuilder()
                             .setUnknown1(1)
