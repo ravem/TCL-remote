@@ -20,6 +20,12 @@ ADB e nessuna opzione sviluppatore richiesta sulla TV per le funzioni base.
 - Voice push-to-talk (il telefono fa da microfono, 8 kHz mono PCM).
 - Catalogo curato di app note (avvio via app link / package).
 - Permessi gestiti: ACCESS_LOCAL_NETWORK (Android 17), RECORD_AUDIO.
+- Certificato client riusato in locale (RSA 2048, BouncyCastle). Fix: i file del
+  certificato NON devono essere resi illeggibili con `setReadable(false, ...)`,
+  poiche svuotare il bit di lettura owner rende il file illeggibile anche dalla
+  stessa app (errore EACCES al riavvio). I file in `context.filesDir` sono gia
+  privati all'app (directory mode 0700), quindi non serve alcuna modifica dei
+  permessi.
 
 Build: `./gradlew :app:assembleDebug` (APK in
 `app/build/outputs/apk/debug/app-debug.apk`).
@@ -65,6 +71,7 @@ app/src/main/java/it/paolostefani/tclremote/
   ui/                        Schermate Compose e tema.
   remote/
     CertStore.kt             Certificato self-signed e SSL.
+    TvAdb.kt                 Client ADB opzionale (debug di rete) extras.
     PairingConnection.kt     Handshake di pairing (porta 6467).
     RemoteConnection.kt      Connessione remota persistente (porta 6466).
     TvDiscovery.kt           Discovery mDNS / NSD.

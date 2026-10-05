@@ -62,7 +62,15 @@ class CertStore(private val context: Context) {
     /** Generate (if needed) and return the private key + certificate chain. */
     private fun ensureKeyPair(): Pair<KeyPair, X509Certificate> {
         if (certFile.exists() && keyFile.exists()) {
-            return loadFromDisk()
+            // If the stored files can't be read (e.g. an older build cleared the
+            // owner read bit and left them EACCES), discard and regenerate.
+            return try {
+                loadFromDisk()
+            } catch (e: Exception) {
+                certFile.delete()
+                keyFile.delete()
+                generateAndSave()
+            }
         }
         return generateAndSave()
     }
@@ -98,9 +106,11 @@ class CertStore(private val context: Context) {
         writePem(certFile, cert)
         writePem(keyFile, keyPair.private)
 
-        // Make the private key readable only by this app.
-        keyFile.setReadable(false, false)
-        certFile.setReadable(false, false)
+        // NOTE: do NOT call setReadable(false, ...) here. Clearing the owner
+        // read bit also makes the file unreadable by this same app, so the
+        // next buildSslContext()/readCertificate() fails with EACCES. Files in
+        // context.filesDir are already private to the app (the parent directory
+        // is mode 0700), so no extra permission tweak is needed.
 
         return keyPair to cert
     }
