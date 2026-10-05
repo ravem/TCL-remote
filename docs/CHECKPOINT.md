@@ -48,10 +48,16 @@ automaticamente quando il debug di rete e disponibile:
       passthrough, scorciatoia Live TV, AirPlay).
 - [x] Apertura delle impostazioni audio e dei quick settings.
 
+Migliorie voce implementate: macchina a stati IDLE / STARTING / LISTENING /
+ERROR, con messaggi di stato nella UI, gestione esplicita degli errori del
+microfono (buffer non allocato, dispositivo non inizializzato, permesso
+negato, disconnessione/traferimento del mic) e reset dello stato quando il TV
+termina la sessione.
+
 Rimangono da fare / da verificare sul campo:
 
 - [ ] Verifica pratica su TV con debug abilitato (pairing autorizzazione ADB).
-- [ ] Migliorie voce (indicatore di stato ed errori della sessione).
+- [ ] Test voce su TV fisica (sessione e flusso audio effettivo).
 
 ## Note tecniche
 

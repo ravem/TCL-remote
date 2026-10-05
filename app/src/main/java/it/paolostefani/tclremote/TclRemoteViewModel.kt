@@ -26,6 +26,8 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
 
     enum class Phase { IDLE, DISCOVERING, NEEDS_PAIRING, PAIRING, CONNECTED, ERROR }
 
+    enum class VoiceStatus { IDLE, STARTING, LISTENING, ERROR }
+
     data class UiState(
         val phase: Phase = Phase.IDLE,
         val message: String? = null,
@@ -38,6 +40,9 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
         val volumeMax: Int? = null,
         val muted: Boolean? = null,
         val voiceActive: Boolean = false,
+        val voiceStatus: VoiceStatus = VoiceStatus.IDLE,
+        val voiceMessage: String? = null,
+        val voiceError: String? = null,
         val pairingServerName: String? = null,
         val apps: List<AppCatalog.App> = AppCatalog.apps,
         val adbConnected: Boolean = false,
@@ -249,43 +254,109 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
 
     // ---- voice ------------------------------------------------------------
 
+    /** Tear down the voice session and surface an error to the UI. */
+    private fun failVoice(message: String) {
+        if (_state.value.voiceActive) {
+            _state.value = _state.value.copy(
+                voiceActive = false,
+                voiceStatus = VoiceStatus.ERROR,
+                voiceMessage = null,
+                voiceError = message
+            )
+            remote?.endVoice()
+            voiceThread?.interrupt()
+            voiceThread = null
+        }
+    }
+
     fun startVoice() {
         if (_state.value.voiceActive) return
         val conn = remote ?: return
-        _state.value = _state.value.copy(voiceActive = true)
+        if (remote?.isConnected() != true) {
+            failVoice("Not connected to the TV.")
+            return
+        }
+        _state.value = _state.value.copy(
+            voiceActive = true,
+            voiceStatus = VoiceStatus.STARTING,
+            voiceMessage = "Starting voice...",
+            voiceError = null
+        )
         conn.startVoice()
         // Capture mic audio in a background thread and stream it.
         voiceThread = Thread({
+            var rec: AudioRecord? = null
             try {
                 val bufferSize = AudioRecord.getMinBufferSize(
                     SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
                 )
-                val rec = AudioRecord(
+                if (bufferSize <= 0) {
+                    failVoice("Microphone buffer allocation failed.")
+                    return@Thread
+                }
+                val record = AudioRecord(
                     MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
                     AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize
                 )
-                audioRecord = rec
-                if (rec.state != AudioRecord.STATE_INITIALIZED) return@Thread
-                rec.startRecording()
+                rec = record
+                audioRecord = record
+                if (record.state != AudioRecord.STATE_INITIALIZED) {
+                    failVoice("Microphone unavailable. Check the microphone permission.")
+                    return@Thread
+                }
+                record.startRecording()
+                _state.value = _state.value.copy(voiceStatus = VoiceStatus.LISTENING, voiceMessage = "Listening...")
                 val buf = ByteArray(4000)
-                while (_state.value.voiceActive) {
-                    val n = rec.read(buf, 0, buf.size)
-                    if (n > 0) {
-                        conn.sendVoiceChunk(buf.copyOf(n))
+                while (_state.value.voiceActive && !Thread.currentThread().isInterrupted) {
+                    val n = record.read(buf, 0, buf.size)
+                    when {
+                        n > 0 -> conn.sendVoiceChunk(buf.copyOf(n))
+                        n == AudioRecord.ERROR_DEAD_OBJECT -> {
+                            failVoice("Microphone was disconnected.")
+                            break
+                        }
+                        n == AudioRecord.ERROR_INVALID_OPERATION || n == AudioRecord.ERROR_BAD_VALUE -> {
+                            failVoice("Microphone stopped unexpectedly.")
+                            break
+                        }
                     }
                 }
-            } catch (_: Exception) {
+            } catch (e: SecurityException) {
+                failVoice("Microphone permission denied.")
+            } catch (e: Exception) {
+                failVoice("Voice failed: ${e.message ?: e.javaClass.simpleName}")
             } finally {
-                audioRecord?.stop()
-                audioRecord?.release()
+                try {
+                    rec?.stop()
+                } catch (_: Exception) {}
+                rec?.release()
                 audioRecord = null
+                rec = null
             }
         }, "voice-stream").apply { isDaemon = true; start() }
     }
 
     fun stopVoice() {
-        _state.value = _state.value.copy(voiceActive = false)
+        if (!_state.value.voiceActive && _state.value.voiceStatus != VoiceStatus.LISTENING) return
+        _state.value = _state.value.copy(
+            voiceActive = false,
+            voiceStatus = VoiceStatus.IDLE,
+            voiceMessage = null,
+            voiceError = null
+        )
         remote?.endVoice()
+        voiceThread?.interrupt()
+        voiceThread = null
+    }
+
+    /** Reset the voice UI: called when the TV reports the session ended. */
+    private fun endVoiceFromTv() {
+        if (_state.value.voiceStatus == VoiceStatus.ERROR) return
+        _state.value = _state.value.copy(
+            voiceActive = false,
+            voiceStatus = VoiceStatus.IDLE,
+            voiceMessage = null
+        )
         voiceThread?.interrupt()
         voiceThread = null
     }
@@ -322,10 +393,15 @@ class TclRemoteViewModel(app: Application) : AndroidViewModel(app) {
             _state.value = _state.value.copy(volume = level, volumeMax = max, muted = muted)
         }
 
-        override fun onVoiceSessionStarted(sessionId: Int) {}
+        override fun onVoiceSessionStarted(sessionId: Int) {
+            // Acknowledge the session is live; keep streaming focus on the mic thread.
+            if (_state.value.voiceStatus == VoiceStatus.STARTING) {
+                _state.value = _state.value.copy(voiceStatus = VoiceStatus.LISTENING, voiceMessage = "Listening...")
+            }
+        }
 
         override fun onVoiceSessionEnded() {
-            _state.value = _state.value.copy(voiceActive = false)
+            endVoiceFromTv()
         }
     }
 

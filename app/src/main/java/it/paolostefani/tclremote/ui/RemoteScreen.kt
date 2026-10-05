@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.VolumeDown
 import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilledIconButton
@@ -137,7 +138,22 @@ fun RemoteScreen(state: TclRemoteViewModel.UiState, viewModel: TclRemoteViewMode
         Spacer(Modifier.height(16.dp))
 
         // Voice push-to-talk
-        VoiceButton(active = state.voiceActive, viewModel = viewModel)
+        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+            VoiceButton(state = state, viewModel = viewModel)
+            if (state.voiceStatus != TclRemoteViewModel.VoiceStatus.IDLE) {
+                val text = state.voiceError ?: state.voiceMessage
+                if (text != null) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (state.voiceError != null) MaterialTheme.colorScheme.error
+                               else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+            }
+        }
         Spacer(Modifier.height(20.dp))
 
         // ADB extras (inputs + quick settings / sound)
@@ -251,12 +267,24 @@ private fun TextInput(viewModel: TclRemoteViewModel) {
 }
 
 @Composable
-private fun VoiceButton(active: Boolean, viewModel: TclRemoteViewModel) {
+private fun VoiceButton(state: TclRemoteViewModel.UiState, viewModel: TclRemoteViewModel) {
+    val active = state.voiceActive
+    val label = when (state.voiceStatus) {
+        TclRemoteViewModel.VoiceStatus.IDLE -> "Hold to speak"
+        TclRemoteViewModel.VoiceStatus.STARTING -> "Starting..."
+        TclRemoteViewModel.VoiceStatus.LISTENING -> "Listening..."
+        TclRemoteViewModel.VoiceStatus.ERROR -> "Voice error"
+    }
+    val colors = if (state.voiceStatus == TclRemoteViewModel.VoiceStatus.ERROR) {
+        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+    } else {
+        ButtonDefaults.buttonColors()
+    }
     Button(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .pointerInput(Unit) {
+            .pointerInput(state.voiceError) {
                 detectTapGestures(
                     onPress = {
                         viewModel.startVoice()
@@ -265,11 +293,12 @@ private fun VoiceButton(active: Boolean, viewModel: TclRemoteViewModel) {
                     }
                 )
             },
-        onClick = {}
+        onClick = {},
+        colors = colors
     ) {
         Icon(Icons.Default.Mic, contentDescription = null)
         Spacer(Modifier.width(8.dp))
-        Text(if (active) "Listening..." else "Hold to speak")
+        Text(label)
     }
 }
 
